@@ -1,0 +1,34 @@
+use clap::{Arg, App};
+use rust_htslib::{bam, bam::Read, bam::IndexedReader};
+use std::sync::Arc;
+use std::thread;
+
+fn main() {
+    let matches = App::new("NoisExtractor")
+        .version("0.1.0")
+        .author("Nacho Garcia <iggl@fhi.no>")
+        .about("Noise Extraction of BAM Files")
+        .arg(Arg::with_name("file")
+                 .short("f")
+                 .long("file")
+                 .takes_value(true)
+                 .help("BAM file"))
+        .get_matches();
+
+    let myfile = matches.value_of("file").unwrap_or("/home/nacho/Rust/NoiseXtractor/test.bam");
+    println!("The file passed is: {}", myfile);
+
+    let bam = bam::Reader::from_path(&"/home/nacho/Rust/NoiseXtractor/test.bam").unwrap();
+
+    bam.fetch(("chrI", 10000, 20000)); // coordinates 10000..20000 on reference named "chrX"
+    for read in bam.records() {
+        println!("read name: {:?}", read.unwrap().qname());
+    }
+
+
+
+
+
+    
+
+}
