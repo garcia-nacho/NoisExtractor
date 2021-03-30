@@ -45,6 +45,7 @@ fn main() {
 
         let mut read_vector = Vec::new();
         let mut majority =0;
+        let mut majority2 =0;
         let mut majority_base="N";
         let mut majority_base2="N";
         let bases = vec!["A", "T", "C","G","D"];
