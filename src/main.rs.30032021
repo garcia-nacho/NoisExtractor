@@ -21,37 +21,35 @@ fn main() {
 
 
     let mut bam = IndexedReader::from_path(&myfile).unwrap();
-    //bam.fetch((0, 10500, 10510)).unwrap(); 
+    bam.fetch((0, 10500, 10510)).unwrap(); 
     //MN908947.3
 
     for p in bam.pileup() {
         let pileup = p.unwrap();
         //println!("{}:{} depth {}", pileup.tid(), pileup.pos(), pileup.depth());
         let mut seq_string = String::from("Seq:");
-        let mut foo = Vec::new();
+        let mut bases_total = Vec::new();
 
         for alignment in pileup.alignments() {
             if !alignment.is_del() && !alignment.is_refskip() {
                 //println!("{}", alignment.record().seq()[alignment.qpos().unwrap()] as char);
                 //seq_string.push(alignment.record().seq()[aligSnment.qpos().unwrap()] as char);
             
-                foo.push(alignment.record().seq()[alignment.qpos().unwrap()]);
+                bases_total.push(alignment.record().seq()[alignment.qpos().unwrap()]);
                 //println!("{}", alignment.record().seq());
             }
             else{
-                foo.push(0);
+                bases_total.push(0);
 
 
-            }
-
-                        
+            }            
 
         }
         let mut read_vector = Vec::new();
         let mut majority =0;
         let mut majority_base="N";
 
-        let base_A = foo.iter().filter(|&n| *n == 65).count();
+        let base_A = bases_total.iter().filter(|&n| *n == 65).count();
         read_vector.push(base_A);
 
         if base_A > majority {
@@ -59,7 +57,7 @@ fn main() {
             majority_base = "A";
         }
 
-        let base_T = foo.iter().filter(|&n| *n == 84).count();
+        let base_T = bases_total.iter().filter(|&n| *n == 84).count();
         read_vector.push(base_T);
 
         if base_T > majority {
@@ -67,7 +65,7 @@ fn main() {
             majority_base = "T";
         }
         
-        let base_C = foo.iter().filter(|&n| *n == 67).count();
+        let base_C = bases_total.iter().filter(|&n| *n == 67).count();
         read_vector.push(base_C);
 
         if base_C > majority {
@@ -75,7 +73,7 @@ fn main() {
             majority_base = "C";
         }
 
-        let base_G = foo.iter().filter(|&n| *n ==71).count();
+        let base_G = bases_total.iter().filter(|&n| *n ==71).count();
         read_vector.push(base_G);
 
         if base_G > majority {
@@ -83,7 +81,7 @@ fn main() {
             majority_base = "G";
         }
  
-        let base_D= foo.iter().filter(|&n| *n == 0).count();
+        let base_D= bases_total.iter().filter(|&n| *n == 0).count();
         read_vector.push(base_D);
 
         if base_D > majority {
@@ -96,14 +94,12 @@ fn main() {
         let noise: f64 =  (pileup.depth() as u16 - majority as u16).into();
         let noise_t= noise / pileup.depth() as f64;
 
-
-
         println!("{}\t{}\t{}\t{}", pileup.pos(),noise_t,pileup.depth() as u32,majority_base);
         //println!("Total {}", pileup.depth() as u16);
         //println!("Noise {:?}", noise);
         //println!("Noise_t {:?}", noise_t);
         //println!("MR {:?}", majority_base);
-        
+        //println!("{:?}", bases_total);
 
     }
 
