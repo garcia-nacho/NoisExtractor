@@ -16,13 +16,38 @@ fn main() {
                  .long("file")
                  .takes_value(true)
                  .help("BAM file"))
+        .arg(Arg::with_name("cutoff")
+                .short("c")
+                .long("cutoff")
+                .takes_value(true)
+                .help("Cut-off for calling secondary sequence"))
+        .arg(Arg::with_name("output")
+                .short("o")
+                .long("out")
+                .takes_value(true)
+                .help("Output files to save"))
         .get_matches();
 
     let myfile = matches.value_of("file").unwrap();
+//cutoff for calling the secondary sequence
+    let c_o = matches.value_of("cutoff");
+    let mut cutoff= 0.0;
 
+    match c_o {
+        None => cutoff = 0.0,
+        Some(s) => {
+            match s.parse::<f64>() {
+                Ok(c) => cutoff = c,
+                Err(_) => cutoff = 0.0,
+            }
+        }
+    }
+
+//Output files
+    let output_file = matches.value_of("output").unwrap_or("none");
 
     let mut bam = IndexedReader::from_path(&myfile).unwrap();
-    bam.fetch((0, 10500, 10510)).unwrap(); 
+    //bam.fetch((0, 10500, 10510)).unwrap(); 
     //MN908947.3
 
     for p in bam.pileup() {
