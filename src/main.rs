@@ -42,7 +42,7 @@ fn main() {
             }
         }
     }
-
+//println!("cutoff{}", cutoff);
 //Output files
     let output_file = matches.value_of("output").unwrap_or("none");
 
@@ -126,15 +126,19 @@ fn main() {
         let ordered_bases = permutation.apply_slice(&bases[..]);
         let ordered_reads = permutation.apply_slice(&read_vector[..]);
         let mut freq_mr2: f64 = 0.0;
+
         if ordered_reads[3]==0 {
             majority_base2 = ordered_bases[4];
         }else{
             majority_base2 = ordered_bases[3];
             majority2= ordered_reads[3];
             freq_mr2 = majority2 as f64 / pileup.depth() as f64;
+            
+            if freq_mr2 < cutoff {
+                majority_base2= ordered_bases[4];
+            }
         }
         
-
         //Noise calculation
         let noise: f64 =  (pileup.depth() as u16 - majority as u16).into();
         let noise_t= noise / pileup.depth() as f64;
