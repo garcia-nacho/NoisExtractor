@@ -1,12 +1,17 @@
 use rust_htslib::bam::{IndexedReader, Read, Record};
 use clap::{Arg, App};
 use std::sync::Arc;
+use std::path::Path;
+use std::fs::File;
+use std::io::prelude::*;
 
-//use std::time::Instant;
-
+//For speed testing purposes uncomment down
+//use std::time::Instant; 
 
 fn main() {
+    //For speed testing purposes uncomment down
     //let before = Instant::now();
+
     let matches = App::new("NoisExtractor")
         .version("0.1.0")
         .author("Nacho Garcia <iggl@fhi.no>")
@@ -45,10 +50,63 @@ fn main() {
 //println!("cutoff{}", cutoff);
 //Output files
     let output_file = matches.value_of("output").unwrap_or("none");
+    let name = &myfile;
+    let name = name.replace(".bam", "");
+    let header = ">";
+    let mut mr_name = &header;
+    let mut ct_name = &header;
+    println!("{}",name);
+    println!("{}",mr_name);
+    println!("{}",ct_name);
+
+
+    //name.push_str("_mr");
+
+    if output_file != "none"{
+
+    //Consensus
+        let mut output_fa = String::from(output_file);
+        output_fa.push_str("_MR.fa");
+        println!("{}", output_fa);
+
+        let path_fa = Path::new(&output_fa);
+        let display_fa = path_fa.display();
+        let mut file_1 = match File::create(&path_fa) {
+            Err(why) => panic!("couldn't create {}: {}", display_fa, why),
+            Ok(file_1) => file_1,
+        };
+        match file_1.write_all(">testfasta\r".as_bytes()) {
+            Err(why) => panic!("couldn't write to {}: {}", display_fa, why),
+            Ok (_) => (),
+        }
+
+
+    //Contaminant
+        let mut output_ct = String::from(output_file);
+        output_ct.push_str("_contaminant.fa");
+        println!("{}", output_ct);
+
+        let path_ct = Path::new(&output_ct);
+        let display_ct = path_ct.display();
+        let mut file_2 = match File::create(&path_ct) {
+            Err(why) => panic!("couldn't create {}: {}", display_ct, why),
+            Ok(file_2) => file_2,
+        };
+        match file_2.write_all(">testfasta\r".as_bytes()) {
+            Err(why) => panic!("couldn't write to {}: {}", display_fa, why),
+            Ok(_) => (),
+        }
+
+}//output file =none
 
     let mut bam = IndexedReader::from_path(&myfile).unwrap();
-    //bam.fetch((0, 10500, 10510)).unwrap(); 
+    bam.fetch((0, 10500, 10510)).unwrap(); 
     //MN908947.3
+    
+
+
+    
+    
 
     for p in bam.pileup() {
         let pileup = p.unwrap();
@@ -144,13 +202,23 @@ fn main() {
         let noise_t= noise / pileup.depth() as f64;
 
         println!("{}\t{}\t{}\t{}\t{}\t{}", pileup.pos(),noise_t,pileup.depth() as u32,majority_base, majority_base2, freq_mr2);
-        //println!("Total {}", pileup.depth() as u16);
-
+        //println!("Total {}", pileup.depth() as u16);    
+       // file.write_all("\nTutorialsPoint".as_bytes()).expect("write failed");
         //println!("{:?}", ordered_bases);
         
+        //Create vector for storing data and writing it at the end.
+        /* match file_fa.write_all(majority_base2.as_bytes()) {
+            Err(why) => panic!("couldn't write to {}: {}", display, why),
+            Ok(_) => (),
+        }*/ 
 
     }
+    
 
+
+
+
+   
     //println!("Elapsed time: {:.2?}", before.elapsed());
 
 }
