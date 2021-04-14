@@ -614,6 +614,7 @@ dependencies = [
  "bio",
  "clap",
  "permutation",
+ "regex",
  "rust-htslib",
 ]
 

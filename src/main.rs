@@ -1,9 +1,10 @@
-use rust_htslib::bam::{IndexedReader, Read, Record};
+use rust_htslib::bam::{IndexedReader, Read};
 use clap::{Arg, App};
-use std::sync::Arc;
 use std::path::Path;
 use std::fs::File;
 use std::io::prelude::*;
+use regex::Regex;
+use std::fs;
 
 //For speed testing purposes uncomment down
 //use std::time::Instant; 
@@ -49,25 +50,26 @@ fn main() {
     }
 //println!("cutoff{}", cutoff);
 //Output files
-    let output_file = matches.value_of("output").unwrap_or("none");
+    let output_file = matches.value_of("output").unwrap_or("temp");
     let name = &myfile;
     let name = name.replace(".bam", "");
-    let header = ">";
-    let mut mr_name = &header;
-    let mut ct_name = &header;
-    println!("{}",name);
-    println!("{}",mr_name);
-    println!("{}",ct_name);
+    let re = Regex::new(r".*/").unwrap();
 
+    let name = re.replace(&name, "");
 
-    //name.push_str("_mr");
+    let mut header_mr: String = ">".to_owned();
+    let mut header_ct: String = ">".to_owned();
+    
+    header_mr.push_str(&name);
+    header_ct.push_str(&name);
 
-    if output_file != "none"{
+    header_mr.push_str("_MR\r");
+    header_ct.push_str("_CT\r");
 
     //Consensus
         let mut output_fa = String::from(output_file);
         output_fa.push_str("_MR.fa");
-        println!("{}", output_fa);
+        //println!("{}", output_fa);
 
         let path_fa = Path::new(&output_fa);
         let display_fa = path_fa.display();
@@ -75,16 +77,15 @@ fn main() {
             Err(why) => panic!("couldn't create {}: {}", display_fa, why),
             Ok(file_1) => file_1,
         };
-        match file_1.write_all(">testfasta\r".as_bytes()) {
+        match file_1.write_all(&header_mr.as_bytes()) {
             Err(why) => panic!("couldn't write to {}: {}", display_fa, why),
             Ok (_) => (),
         }
 
-
     //Contaminant
         let mut output_ct = String::from(output_file);
         output_ct.push_str("_contaminant.fa");
-        println!("{}", output_ct);
+        //println!("{}", output_ct);
 
         let path_ct = Path::new(&output_ct);
         let display_ct = path_ct.display();
@@ -92,21 +93,13 @@ fn main() {
             Err(why) => panic!("couldn't create {}: {}", display_ct, why),
             Ok(file_2) => file_2,
         };
-        match file_2.write_all(">testfasta\r".as_bytes()) {
-            Err(why) => panic!("couldn't write to {}: {}", display_fa, why),
+        match file_2.write_all(&header_ct.as_bytes()) {
+            Err(why) => panic!("couldn't write to {}: {}", display_ct, why),
             Ok(_) => (),
         }
 
-}//output file =none
-
     let mut bam = IndexedReader::from_path(&myfile).unwrap();
     bam.fetch((0, 10500, 10510)).unwrap(); 
-    //MN908947.3
-    
-
-
-    
-    
 
     for p in bam.pileup() {
         let pileup = p.unwrap();
@@ -116,7 +109,6 @@ fn main() {
         for alignment in pileup.alignments() {
             if !alignment.is_del() && !alignment.is_refskip() {
 
-            
                 total_base.push(alignment.record().seq()[alignment.qpos().unwrap()]);
 
             }
@@ -160,7 +152,6 @@ fn main() {
             majority_base = "C";       
         }
 
-
         //Base G
         let base_G = total_base.iter().filter(|&n| *n ==71).count();
         read_vector.push(base_G);
@@ -203,22 +194,32 @@ fn main() {
 
         println!("{}\t{}\t{}\t{}\t{}\t{}", pileup.pos(),noise_t,pileup.depth() as u32,majority_base, majority_base2, freq_mr2);
         //println!("Total {}", pileup.depth() as u16);    
-       // file.write_all("\nTutorialsPoint".as_bytes()).expect("write failed");
+        // file.write_all("\nTutorialsPoint".as_bytes()).expect("write failed");
         //println!("{:?}", ordered_bases);
         
-        //Create vector for storing data and writing it at the end.
-        /* match file_fa.write_all(majority_base2.as_bytes()) {
-            Err(why) => panic!("couldn't write to {}: {}", display, why),
-            Ok(_) => (),
-        }*/ 
+        if output_file != "temp"{
+
+            match file_2.write_all(majority_base2.as_bytes()) {
+                Err(why) => panic!("couldn't write to {}",  why),
+                Ok(_) => (),
+            }
+
+            match file_1.write_all(majority_base.as_bytes()) {
+                Err(why) => panic!("couldn't write to {}",  why),
+                Ok(_) => (),
+            }
+        }
+        //Delete temp files
 
     }
     
+    if output_file == "temp"{
 
+        fs::remove_file(&output_fa).unwrap();
+        fs::remove_file(&output_ct).unwrap();
 
+    }
 
-
-   
     //println!("Elapsed time: {:.2?}", before.elapsed());
 
 }
