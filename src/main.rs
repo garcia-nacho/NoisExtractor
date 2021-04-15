@@ -1,3 +1,16 @@
+/* 
+FHINEx 
+FHI Noise Extractor
+
+Licenced under GPL v3 licence
+
+Ignacio Garcia Llorente 2021 
+iggl@fhi.no
+Folkehelseinstitute 
+Oslo-Norway
+
+*/
+
 use rust_htslib::bam::{IndexedReader, Read};
 use clap::{Arg, App};
 use std::path::Path;
@@ -32,7 +45,14 @@ fn main() {
                 .long("out")
                 .takes_value(true)
                 .help("Output files to save"))
+        .arg(Arg::with_name("del_mode")
+                .short("d")
+                .long("del_mode")
+                .takes_value(false)
+                .help("Mask deletions"))
         .get_matches();
+
+  
 
     let myfile = matches.value_of("file").unwrap();
 //cutoff for calling the secondary sequence
@@ -99,8 +119,9 @@ fn main() {
         }
 
     let mut bam = IndexedReader::from_path(&myfile).unwrap();
-    bam.fetch((0, 10500, 10510)).unwrap(); 
+    //bam.fetch((0, 10500, 10510)).unwrap(); 
 
+    let mut index=0;
     for p in bam.pileup() {
         let pileup = p.unwrap();
 
@@ -192,12 +213,20 @@ fn main() {
         let noise: f64 =  (pileup.depth() as u16 - majority as u16).into();
         let noise_t= noise / pileup.depth() as f64;
 
-        println!("{}\t{}\t{}\t{}\t{}\t{}", pileup.pos(),noise_t,pileup.depth() as u32,majority_base, majority_base2, freq_mr2);
-        //println!("Total {}", pileup.depth() as u16);    
-        // file.write_all("\nTutorialsPoint".as_bytes()).expect("write failed");
-        //println!("{:?}", ordered_bases);
+        println!("{}\t{}\t{}\t{}\t{}\t{}", pileup.pos()+1,noise_t,pileup.depth() as u32,majority_base, majority_base2, freq_mr2);
         
         if output_file != "temp"{
+
+            //Needed a loop to fill gaps here plus if
+
+            
+            if matches.is_present("del_mode") && majority_base2=="D" {
+                majority_base2="";
+            }
+            if matches.is_present("del_mode") && majority_base=="D" {
+                majority_base="";
+            }
+            
 
             match file_2.write_all(majority_base2.as_bytes()) {
                 Err(why) => panic!("couldn't write to {}",  why),
@@ -209,10 +238,10 @@ fn main() {
                 Ok(_) => (),
             }
         }
-        //Delete temp files
+        
 
     }
-    
+    //Delete temp files
     if output_file == "temp"{
 
         fs::remove_file(&output_fa).unwrap();
