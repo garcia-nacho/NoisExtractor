@@ -11,11 +11,13 @@ Oslo-Norway
 
 */
 
-use rust_htslib::bam::{IndexedReader, Read};
+//use rust_htslib::bam::{IndexedReader, Read};
+use rust_htslib::{bam, bam::Read, bam::IndexedReader};
 use clap::{Arg, App};
 use std::path::Path;
 use std::fs::File;
 use std::io::prelude::*;
+use std::iter;
 use regex::Regex;
 use std::fs;
 
@@ -52,7 +54,7 @@ fn main() {
                 .help("Mask deletions"))
         .get_matches();
 
-  
+    //matches.is_present("dyn_mode")
 
     let myfile = matches.value_of("file").unwrap();
 //cutoff for calling the secondary sequence
@@ -83,8 +85,8 @@ fn main() {
     header_mr.push_str(&name);
     header_ct.push_str(&name);
 
-    header_mr.push_str("_MR\r");
-    header_ct.push_str("_CT\r");
+    header_mr.push_str("_MajorityRule\r");
+    header_ct.push_str("_Contaminant\r");
 
     //Consensus
         let mut output_fa = String::from(output_file);
@@ -121,7 +123,8 @@ fn main() {
     let mut bam = IndexedReader::from_path(&myfile).unwrap();
     //bam.fetch((0, 10500, 10510)).unwrap(); 
 
-    let mut index=0;
+    let mut index=1;
+
     for p in bam.pileup() {
         let pileup = p.unwrap();
 
@@ -136,7 +139,10 @@ fn main() {
             else{
                 total_base.push(0);
             }
-                    
+              
+            //Insertion
+            // * fetch(FetchDefinition::Unmapped) or fetch("*") -> Fetch unmapped (as signified by the 'unmapped' flag in the BAM - might be unreliable with some aligners.
+            
         }
 
         let mut read_vector = Vec::new();
@@ -215,8 +221,25 @@ fn main() {
 
         println!("{}\t{}\t{}\t{}\t{}\t{}", pileup.pos()+1,noise_t,pileup.depth() as u32,majority_base, majority_base2, freq_mr2);
         
+        let pad_n: u32 =&pileup.pos()+1-&index;
+        //println!("{}",pad_n);
         if output_file != "temp"{
 
+            if pad_n >1{
+            
+                let pad: String = iter::repeat("N").take(pad_n as usize).collect();
+
+                match file_2.write_all(pad.as_bytes()) {
+                    Err(why) => panic!("couldn't write to {}",  why),
+                    Ok(_) => (),
+                }
+    
+                match file_1.write_all(pad.as_bytes()) {
+                    Err(why) => panic!("couldn't write to {}",  why),
+                    Ok(_) => (),
+                }
+
+        }
             //Needed a loop to fill gaps here plus if
 
             
@@ -239,7 +262,7 @@ fn main() {
             }
         }
         
-
+        index =  pileup.pos()+1;
     }
     //Delete temp files
     if output_file == "temp"{
