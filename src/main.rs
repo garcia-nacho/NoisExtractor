@@ -241,7 +241,7 @@ fn main() {
 
         }
             //Needed a loop to fill gaps here plus if
-
+            
             
             if matches.is_present("del_mode") && majority_base2=="D" {
                 majority_base2="";
