@@ -56,8 +56,6 @@ fn main() {
 
     //matches.is_present("dyn_mode")
 
-    //maxdepth
-
     let myfile = matches.value_of("file").unwrap();
 //cutoff for calling the secondary sequence
     let c_o = matches.value_of("cutoff");
@@ -129,13 +127,15 @@ fn main() {
 
     let mut index=1;
     
+    //set_max_depth(800u32);
+    //p.set_max_depth(800u32);
     let mut p = bam.pileup();
-    p.set_max_depth(100000u32); //Fixing maximum depth 
+    p.set_max_depth(0u32);
 
     for p2 in p{
         
         let pileup = p2.unwrap();
-
+        pileup.set_max_depth(0u32);
         let mut total_base = Vec::new();
 
         for alignment in pileup.alignments() {
