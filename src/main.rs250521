@@ -147,8 +147,11 @@ fn main() {
             }
             
             match alignment.indel() {
-                bam::pileup::Indel::Ins(len) => println!("Insertion of length {} between this and next position.", len),
-                bam::pileup::Indel::Del(len) => println!("Deletion of length {} between this and next position.", len),
+                bam::pileup::Indel::Ins(len) => {
+                    total_base.push(1);
+                    println!("Insertion of length {} between this and next position.", len);
+                },
+                bam::pileup::Indel::Del(len) => (),
                 bam::pileup::Indel::None => ()
             }
 
@@ -204,6 +207,16 @@ fn main() {
             majority=base_D;
             majority_base = "D";
         }
+
+        // Insertions
+        let base_I= total_base.iter().filter(|&n| *n == 1).count();
+        read_vector.push(base_I);
+
+        if base_I > majority {
+            majority=base_I;
+            majority_base = "I";
+        }
+
 
         //Sequence 2 calculation
         let permutation = permutation::sort(&read_vector[..]);
