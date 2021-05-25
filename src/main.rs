@@ -11,8 +11,7 @@ Oslo-Norway
 
 */
 
-//use rust_htslib::bam::{IndexedReader, Read};
-use rust_htslib::{bam, bam::Read, bam::IndexedReader};
+use rust_htslib::{bam::Read, bam::IndexedReader};
 use clap::{Arg, App};
 use std::path::Path;
 use std::fs::File;
@@ -123,7 +122,6 @@ fn main() {
         }
 
     let mut bam = IndexedReader::from_path(&myfile).unwrap();
-    //let mut bam = bam::Reader::from_path(&myfile).unwrap();
 
     //bam.fetch((0, 10500, 10510)).unwrap(); 
 
@@ -146,11 +144,7 @@ fn main() {
             }
             else{
                 total_base.push(0);
-            }
-              
-            //Insertion
-            // * fetch(FetchDefinition::Unmapped) or fetch("*") -> Fetch unmapped (as signified by the 'unmapped' flag in the BAM - might be unreliable with some aligners.
-            
+            }       
         }
 
         let mut read_vector = Vec::new();
