@@ -122,7 +122,7 @@ fn main() {
 
     let mut bam = IndexedReader::from_path(&myfile).unwrap();
 
-    bam.fetch((0, 27000, 28000)).unwrap(); 
+    bam.fetch((0, 27620, 27630)).unwrap(); 
 
     let mut index=1;
     
@@ -151,9 +151,9 @@ fn main() {
             match alignment.indel() {
                 bam::pileup::Indel::Ins(len) => {
                     
-                    ins_base.push(alignment.record().seq()[alignment.qpos().unwrap()]);
-                    //ins_base.push(alignment.record().seq()[30]);
-                    println!("Insertion of length {} base {}, {},{}", len, alignment.record().seq()[1],alignment.record().seq()[2],alignment.record().seq()[3]);
+                    //ins_base.push(alignment.record().seq()[alignment.qpos().unwrap()]);
+                    let ins_base2 =  alignment.record().seq();
+                    println!("Insertion of length {} P {}, B1 {},{}", len, alignment.qpos().unwrap(),ins_base2,alignment.record().seq()[54]);
                     in_count += 1; 
                     in_len = len;
                 },
@@ -229,7 +229,7 @@ fn main() {
             freq_mr2 = majority2 as f64 / pileup.depth() as f64;
             
             if freq_mr2 < cutoff {
-                majority_base2= ordered_bases[5]; //Changes to adjust to insertions
+                majority_base2= ordered_bases[4]; //Changes to adjust to insertions
             }
         }
         
