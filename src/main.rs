@@ -122,7 +122,7 @@ fn main() {
 
     let mut bam = IndexedReader::from_path(&myfile).unwrap();
 
-    bam.fetch((0, 27620, 27630)).unwrap(); 
+    //bam.fetch((0, 27620, 27630)).unwrap(); 
 
     let mut index=1;
     
@@ -135,7 +135,7 @@ fn main() {
         let pileup = p2.unwrap();
 
         let mut total_base = Vec::new();
-        let mut ins_base = Vec::new(); 
+        //let mut ins_base = Vec::new(); 
         in_count =0;
         in_len=0;
         for alignment in pileup.alignments() {
@@ -153,7 +153,7 @@ fn main() {
                     
                     //ins_base.push(alignment.record().seq()[alignment.qpos().unwrap()]);
                     let ins_base2 =  alignment.record().seq();
-                    println!("Insertion of length {} P {}, B1 {},{}", len, alignment.qpos().unwrap(),ins_base2,alignment.record().seq()[54]);
+                    //println!("Insertion of length {} P {}, B1 {}", len, alignment.qpos().unwrap(),alignment.record().seq()[54]);
                     in_count += 1; 
                     in_len = len;
                 },
