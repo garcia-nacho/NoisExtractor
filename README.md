@@ -1,4 +1,4 @@
-# FHINex (FHI Noise Extarctor) 
+# FINex (FolkehelseInstitute's Noise Extractor) 
 
 # 
 # Installing FHINex
