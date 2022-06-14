@@ -55,6 +55,7 @@ fn main() {
 
     //matches.is_present("dyn_mode")
 
+    //maxdepth
 
     let myfile = matches.value_of("file").unwrap();
 //cutoff for calling the secondary sequence
@@ -70,7 +71,7 @@ fn main() {
             }
         }
     }
-
+//println!("cutoff{}", cutoff);
 //Output files
     let output_file = matches.value_of("output").unwrap_or("temp");
     let name = &myfile;
@@ -122,22 +123,19 @@ fn main() {
 
     let mut bam = IndexedReader::from_path(&myfile).unwrap();
 
-    //bam.fetch((0, 27620, 27630)).unwrap(); 
+    //bam.fetch((0, 10500, 10510)).unwrap(); 
 
     let mut index=1;
     
     let mut p = bam.pileup();
-    p.set_max_depth(120000u32); //Fixing maximum depth to 120Kreads
-    let mut in_count = 0;
-    let mut in_len = 0;
+    p.set_max_depth(120000u32); //Fixing maximum depth 
+
     for p2 in p{
         
         let pileup = p2.unwrap();
 
         let mut total_base = Vec::new();
-        //let mut ins_base = Vec::new(); 
-        in_count =0;
-        in_len=0;
+
         for alignment in pileup.alignments() {
             if !alignment.is_del() && !alignment.is_refskip() {
 
@@ -150,15 +148,11 @@ fn main() {
             
             match alignment.indel() {
                 bam::pileup::Indel::Ins(len) => {
-                    
-                    //ins_base.push(alignment.record().seq()[alignment.qpos().unwrap()]);
-                    let ins_base2 =  alignment.record().seq();
-                    //println!("Insertion of length {} P {}, B1 {}", len, alignment.qpos().unwrap(),alignment.record().seq()[54]);
-                    in_count += 1; 
-                    in_len = len;
+                    total_base.push(1);
+                    println!("Insertion of length {} between this and next position.", len);
                 },
-                bam::pileup::Indel::Del(len2) => (),
-                bam::pileup::Indel::None => (),
+                bam::pileup::Indel::Del(len) => (),
+                bam::pileup::Indel::None => ()
             }
 
         }
@@ -214,6 +208,15 @@ fn main() {
             majority_base = "D";
         }
 
+        // Insertions
+        let base_I= total_base.iter().filter(|&n| *n == 1).count();
+        read_vector.push(base_I);
+
+        if base_I > majority {
+            majority=base_I;
+            majority_base = "I";
+        }
+
 
         //Sequence 2 calculation
         let permutation = permutation::sort(&read_vector[..]);
@@ -222,34 +225,23 @@ fn main() {
         let mut freq_mr2: f64 = 0.0;
 
         if ordered_reads[3]==0 {
-            majority_base2 = ordered_bases[4]; //Changes to adjust to insertions
+            majority_base2 = ordered_bases[4];
         }else{
-            majority_base2 = ordered_bases[3]; //Changes to adjust to insertions
-            majority2= ordered_reads[3]; //Changes to adjust to insertions
+            majority_base2 = ordered_bases[3];
+            majority2= ordered_reads[3];
             freq_mr2 = majority2 as f64 / pileup.depth() as f64;
             
             if freq_mr2 < cutoff {
-                majority_base2= ordered_bases[4]; //Changes to adjust to insertions
+                majority_base2= ordered_bases[4];
             }
         }
         
         //Noise calculation
         let noise: f64 =  (pileup.depth() as u16 - majority as u16).into();
-        let noise_t = noise / pileup.depth() as f64;
-        let noise_in = in_count as f64 / pileup.depth() as f64;
-        let noise_in_neg = 1 as f64 - noise_in;
-        let mut noise_in_to = 0 as f64;
+        let noise_t= noise / pileup.depth() as f64;
 
-        if noise_in >= noise_in_neg {
-            noise_in_to = noise_in_neg;
-        }else{
-            noise_in_to = noise_in;
-        }
-
-        println!("{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}", pileup.pos()+1,noise_t,pileup.depth() as u32,majority_base, majority_base2, freq_mr2, noise_in_to, in_len,in_count);
+        println!("{}\t{}\t{}\t{}\t{}\t{}", pileup.pos()+1,noise_t,pileup.depth() as u32,majority_base, majority_base2, freq_mr2);
         
-        //include insertions on majority base
-
         let pad_n: u32 =&pileup.pos()+1-&index;
         //println!("{}",pad_n);
         if output_file != "temp"{
@@ -267,9 +259,9 @@ fn main() {
                     Err(why) => panic!("couldn't write to {}",  why),
                     Ok(_) => (),
                 }
+
         }
-            
-            //Check on insertions
+            //Needed a loop to fill gaps here plus if
             
             
             if matches.is_present("del_mode") && majority_base2=="D" {
