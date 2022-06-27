@@ -2,7 +2,7 @@
 FHINEx 
 FHI Noise Extractor
 
-Licenced under GPL v3 licence
+Licenced under GPL v2 licence
 
 Ignacio Garcia Llorente 2021 
 iggl@fhi.no
