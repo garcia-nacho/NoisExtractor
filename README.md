@@ -1,5 +1,6 @@
 # NoiseExtractor (aka. FINex)   
-[![Linux](https://svgshare.com/i/Zhy.svg)](https://svgshare.com/i/Zhy.svg)   [![made-with-rust](https://img.shields.io/badge/Made%20with-Rust-1f425f.svg)](https://www.rust-lang.org/)   
+[![Linux](https://svgshare.com/i/Zhy.svg)](https://svgshare.com/i/Zhy.svg)   [![made-with-rust](https://img.shields.io/badge/Made%20with-Rust-1f425f.svg)](https://www.rust-lang.org/)    [![Generic badge](https://img.shields.io/badge/Licence-GPLv2-1f425f.svg)](https://shields.io/)   
+   
       
 Retrieve the noise for all the positions of aligened and sorted reads
 
@@ -8,7 +9,8 @@ Compile the binary from the source and copy the binary (noise_extractor) to your
 See [here](https://rustc-dev-guide.rust-lang.org/building/how-to-build-and-run.html) about how to compile Rust source code.   
 
 # Running NoiseExtractor:   
-<code>noise_extractor -f Bam.file.bam -c 0.15 -o output > output.tsv</code>   
+<code>noise_extractor -f Bam.file.bam -c 0.15 -o output > output.tsv</code>      
+   
 Where *-f* is the indexed bam file you want to explore. *-c* is the cutoff under which a position is considered "noisy" (Here we call noise to the sum of the frequencies of bases that are not the one consider the major variant). *-o* is the prefix of the fasta files generated in the output (considering the cutoff defined on *-c*). *-o* and *-c* are not required and if not provided NoiseExtractor will not generate fasta output files (Actually it will generate them anyway, but they will be deleted afterwards)
    
 # Output:   
