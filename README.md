@@ -18,4 +18,4 @@ You will get a tsv with 6 columns: Position, Noise, Depth, Major Variant, Minor 
 Additionally. NoisExtractor will generate two fasta files for the major and minor sequence (Only if the flags *-c* and *-o* are used) 
 
 # Limitations: 
-Noise_extractor can find insertions but they are not inserted in the fasta files. 
+Noise_extractor can find insertions but they are not incorporated into the fasta files. 
