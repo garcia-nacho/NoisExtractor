@@ -1,5 +1,5 @@
 # NoiseExtractor (aka. FINex)   
-[![Linux](https://svgshare.com/i/Zhy.svg)](https://svgshare.com/i/Zhy.svg)   [![made-with-rust](https://img.shields.io/badge/Made%20with-Rust-1f425f.svg)](https://www.rust-lang.org/)    [![Generic badge](https://img.shields.io/badge/Licence-GPLv2-1f425f.svg)](https://shields.io/)   
+[![made-with-rust](https://img.shields.io/badge/Made%20with-Rust-1f425f.svg)](https://www.rust-lang.org/)    [![Generic badge](https://img.shields.io/badge/Licence-GPLv2-1f425f.svg)](https://shields.io/)   
    
       
 Retrieve the noise for all the positions of aligened and sorted reads
